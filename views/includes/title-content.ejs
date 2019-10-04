@@ -4,12 +4,16 @@
   </button>
 
   <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-      <a class="navbar-brand" href="#">Danh sách Barcode</a>
+      <a class="navbar-brand" href=<%= path %>> Trang chủ </a>
+      <a class="navbar-brand" href="#">/</a>
+      <a class="navbar-brand" href=<%= path %>> <%= pageTitle %> </a>
       <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-        
+          
       </ul>
       <form class="form-inline my-2 my-lg-0">
-          <a class="btn btn-outline-danger my-2 my-sm-0" href="/">Logout</a>
+          <input class="form-control mr-sm-2" id="myInput" type="search" placeholder="Search" aria-label="Search"  onkeyup="myFunction()">
+          <button class="btn btn-outline-success my-2 my-sm-0" id="createNew" type="button" 
+          data-toggle="modal" data-target="#my-product-dialog-new">Tạo mới</button>
       </form>
   </div>
 </nav>

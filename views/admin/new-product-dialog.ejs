@@ -1,0 +1,54 @@
+<div class="modal fade" id="my-product-dialog-new" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Thêm mới sản phẩm</h2>
+			</div>
+			<form id="form-add" method="POST" enctype="multipart/form-data">
+				<div class="modal-body ">
+					<div class="form-row">
+						<div class="col-md-7 col-mb-1">
+							<label for="title">Tên sản phẩm</label>
+							<input type="text" class="form-control" id="title" value="" placeholder="Tên sản phẩm" required/>
+						</div>
+          </div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="imgUrl">Ảnh sản phẩm</label>
+							<div class="custom-file">
+								<input type="file" name="myImage" class="custom-file-input" id="imgUrl"/>
+								<label class="custom-file-label" for="new-supplier-avatar">Choose file</label>
+							</div>
+						</div>
+          </div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="barcode">Barcode</label>
+							<input type="text" class="form-control" id="barcode" value="" placeholder="Barcode" />
+						</div>
+          </div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="price">Giá</label>
+							<input type="number" class="form-control" id="price" value="" placeholder="Giá" />
+						</div>
+					</div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="description">Mô tả</label>
+								<textarea class="form-control" id="description"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-default btn-primary closemodal" type="submit" >Tạo mới</button>
+					<button class='btn btn-default btn-dark' id="closemodal" type ='button' data-dismiss="modal">Hủy bỏ</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

@@ -2,9 +2,9 @@ const express = require('express');
 const adminController = require('../controllers/admin');
 const router = express.Router();
 
-// /admin/add-barcode => GET
-// router.get('/add-barcode', adminController.getBarcode);
+// /admin/add-product => GET
+router.get('/add-product', adminController.getAddProduct);
 
-// /admin/barcodes => GET
-router.get('/barcodes', adminController.getBarcodes);
+// /admin/products => GET
+router.get('/products', adminController.getProducts);
 module.exports = router;
