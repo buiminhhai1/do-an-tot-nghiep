@@ -8,8 +8,8 @@
 				<div class="modal-body ">
 					<div class="form-row">
 						<div class="col-md-7 col-mb-1">
-							<label for="title">Tên sản phẩm</label>
-							<input type="text" class="form-control" id="title" value="" placeholder="Tên sản phẩm" required/>
+							<label for="titleProduct">Tên sản phẩm</label>
+							<input type="text" class="form-control" id="titleProduct" value="" placeholder="Tên sản phẩm" required/>
 						</div>
           </div>
           <br>
@@ -52,3 +52,266 @@
 		</div>
 	</div>
 </div>
+
+
+ <!-- <script src="../../handlers/product/productHandlers.js"></script> -->
+ <script>
+ $(document).ready(() =>{
+    // handle for create and edit button click
+    $('.closemodal').on('click',()=>{
+        $('#my-supplier-dialog-new').modal('toggle');
+        $(".modal-backdrop").remove();
+    })
+   
+    $('.closemodaledit').on('click',()=>{
+        $('#my-supplier-dialog-edit').modal('toggle');
+        $(".modal-backdrop").remove();
+    })
+  
+    $(document).keyup(function(e) {
+        if (e.key === "Escape") { // escape key maps to keycode `27`
+            $(".modal-backdrop").remove();
+        }
+    }); 
+
+     $(".custom-file-input").on("change", function() {
+    let fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+
+    // variable for CRUD and Create, update form.
+    const display = $("#display") ;
+    const form = $("#form-add");
+    const titleProduct = $("#titleProduct");
+    const imgUrl = $("#imgUrl");
+    const price = $("#price");
+    const barcode = $("#barcode");
+    const description = $("#description");
+    const closemodal = $("#closemodal");
+
+    // const edittitleProduct = $("#edittitleProduct");
+    // const editimgUrl = $("#editimgUrl");
+    // const editprice = $("#editprice");
+    // const editbarcode = $("#editbarcode");
+    // const editdescription = $("#editdescription");
+    // const editClose = $("#editclose");
+   
+    // const editForm = $("#form-edit");
+
+    const modalNew = $("#my-product-dialog-new");
+  //   const modalEdit = $("#my-supplier-dialog-edit");
+  //   const getSupplier = (pageNo,size) => {
+  //       fetch(`/admin/getSupplier?pageNo=${pageNo}&size=${size}`, {method: "get"})
+  //           .then(response => response.json())
+  //           .then(data =>{
+  //               displaySupplier(data,pageNo,size);
+  //           });
+  //   }
+  //   getSupplier(1,5);
+
+  //  $('#show_paginator').bootpag({
+  //       total: 10,
+  //       page: 1,
+  //       maxVisible: 5
+  //   }).on('page', function(event, num){
+  //       getSupplier(num,5);
+  //   });
+
+  // const buildTemplate = (supplier, ids) =>{
+  //      return `
+       
+  //      <tr id="${ids.listItemID}">
+  //       <td>${ids.stt}</td>
+  //       <td id="${ids.supplierID}">${supplier.displayName}</td>
+  //       <td id="${ids.emailphone}">${supplier.email}</td>
+  //       <td id="${ids.emailphone}">${supplier.phone}</td>
+  //       <td class="text-wrap" id="${ids.address}">${supplier.address}</td>
+  //       <td><div class="text-right">
+  //                   <button type="button" class="btn btn-secondary" id="${ids.editID}" data-toggle="modal" data-target="#my-supplier-dialog-edit">Edit</button>
+  //                   <button type="button" class="btn btn-danger" id="${ids.deleteID}">Delete</button>
+  //               </div> </td>
+  //       </tr>
+  //      `;
+  //   }
+
+    // const buildIDS = (supplier,page,size,index) => {
+    //     return {
+    //        stt: (page-1)*size+index+1,
+    //        listItemID: "listItem_" + supplier._id,
+    //        supplierID: "supplier_" + supplier._id,
+    //        emailphone: "emailphone_" + supplier._id,
+    //        address: "address_" + supplier._id,
+    //        editID: "edit_" + supplier._id,
+    //        deleteID: "delete_" + supplier._id
+    //     }
+    // }
+
+    // handle display Supplier.
+  //   const displaySupplier = (data,page,size) => {
+  //       display.empty();
+  //       data.forEach((supplier,index) => {
+  //           let ids = buildIDS(supplier,page,size,index);
+  //           display.append(buildTemplate(supplier,ids));
+  //           editSupplier(supplier, ids);
+  //           deleteSupplier(supplier, ids);
+  //       });
+  //  }
+
+   // handle reset supplier Input fields
+  resetSupplierInput = () =>{ 
+    titleProduct.val('');
+    $('.custom-file-label')[0].innerText='';
+    $('#imgUrl').val('')
+    price.val('');
+    barcode.val('');
+    description.val('');
+  }
+
+    
+    // handle submit create product
+   form.submit((e) =>{
+       e.preventDefault();
+      //  const formd = $('#form')[0];
+      //   //const formData = new FormData(formd);
+      //   const json = JSON.stringify({
+      //     title: titleProduct.val(),
+      //     price: price.val(),
+      //     barcode: barcode.val(),
+      //     description: description.val(),
+      //     imgUrl: 'dfafsa'});
+        // formData.append('file', $('#imgUrl'));
+        // formData.append('data',json);
+        fetch('/admin/products', {
+          method: 'post',
+          headers : {
+            "Content-Type" : "application/json; charset=utf-8"
+          },
+          body: JSON.stringify({
+            title: titleProduct.val(),
+            price: price.val(),
+            barcode: barcode.val(),
+            description: description.val(),
+            imgUrl: 'something wrong here'
+          })
+           //body: JSON.stringify({displayName: titleProduct.val(),email: price.val(), phone: barcode.val(), address: description.val()}),
+        //    headers: {"Content-Type": "application/json; charset=utf-8"}
+       })
+       .then((response) =>{
+           return response.json();
+       })
+       .then(data =>{
+           if(!data.error){
+            //    if(data.result.ok == 1 && data.result.n == 1){
+            //         let ids = buildIDS(data.document);
+            //         display.append(buildTemplate(data.document,ids));
+            //         editSupplier(data.document,ids);
+            //         deleteSupplier(data.document,ids);
+            //     } 
+           }
+           modalNew.removeAttr("display");
+           modalNew.attr("display","none");
+           closemodal.trigger("click");
+           $(".modal-backdrop").remove();
+           resetSupplierInput();
+           
+       });
+    });
+
+    // wait modalNew add class show, if modalNew has class show, in some case, style{display:none}
+    //therefore dialog not show
+    $('#createNew').click(()=>{
+        setTimeout(() => {
+            if(modalNew.hasClass('show')){
+                modalNew.css("display","block");
+            }
+        
+        }, 1000);
+    });
+    
+    // // handle edit Supplier
+    // const editSupplier = (supplier, ids) => {
+    // let editBtn = $(`#${ids.editID}`);
+    // editBtn.click(()=>{
+    //          fetch(`/admin/supplier/${supplier._id}`, {method: "get"})
+    //         .then(response => response.json())
+    //         .then(async(data)=>{
+    //             await
+    //             editdescription.val(`${data.address}`);
+    //             editprice.val(`${data.email}`);
+    //             editbarcode.val(`${data.phone}`);
+    //             edittitleProduct.val(`${data.displayName}`);
+    //             // editimgUrl.val(`${data.avatar}`);
+    //             $('.custom-file-label')[1].innerText=`${data.avatar}`;
+
+    //             // set style{display: -> block} 
+    //             $("#my-supplier-dialog-edit").css("display","block");
+    //         });
+
+    //         // after form shown and user input value and then click "Cap nhat" button
+    //         // handle submit "Cap nhat" button
+
+    //         editForm.unbind("submit").submit((e) => {
+    //             e.preventDefault();
+    //             let formd = $('#form-edit')[0];
+    //             let formData = new FormData(formd);
+    //             let json = JSON.stringify({
+    //                     displayName: edittitleProduct.val(),
+    //                     avatar: $('.custom-file-label')[1].innerText,
+    //                     email: editprice.val(),
+    //                     phone: editbarcode.val(),
+    //                     address: editdescription.val()
+    //                 });
+    //             formData.append('file', $('#editimgUrl'));
+    //             formData.append('data',json); 
+    //             fetch(`/admin/supplier/${supplier._id}`,{
+    //                 method: "put",
+    //                 // headers: {"Content-Type": "application/json; charset=utf-8"},
+    //                 body: formData
+    //             }).then((response)=>{
+    //                 return response.json();
+    //             }).then((data)=>{
+    //                 if(data.ok == 1){
+    //                     // Display new data.
+    //                     let supplierIndex = $(`#${ids.supplierID}`);
+    //                     supplierIndex.html(data.value.displayName);
+    //                     let emailphone = $(`#${ids.emailphone}`);
+    //                     emailphone.html(data.value.email + ", " + data.value.phone);
+    //                     let phone = $(`#${ids.address}`);
+    //                     phone.html(data.value.address);
+                        
+    //                     // Hide modal
+    //                     modalNew.removeAttr("display");
+    //                     modalNew.attr("display","none");
+    //                     editClose.trigger("click");
+    //                     $(".modal-backdrop").remove();
+                    
+    //                 // get messsage here
+    //                 }else{
+    //                 // get message here
+    //                 }
+    //             });
+    //         })
+       
+    //     });
+    // }
+
+    // handle delete Supplier
+  //   const deleteSupplier = (supplier, ids) =>{
+  //      let deleteBtn = $(`#${ids.deleteID}`);
+  //      deleteBtn.click(() => {
+  //           fetch(`/admin/supplier/${supplier._id}`,{
+  //               method: "delete"
+  //           }).then(response =>{
+  //               return response.json();
+  //           }).then(data => {
+  //               if(data.ok == 1){
+  //                   $(`#${ids.listItemID}`).remove();
+  //               }
+  //           });
+  //      });
+  //  }
+
+
+});
+
+</script>
