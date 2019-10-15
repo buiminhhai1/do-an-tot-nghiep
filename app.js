@@ -86,11 +86,6 @@ const adminData = require('./routes/admin');
 
 app.post('/admin/products', upload, (req, res, next) => {
   console.log('access app.js!');
-   const objProduct = req.body.data;
-   console.log(objProduct);
-   console.log('check');
-  console.log("req body");
-  console.log(req.body);
   const title = req.body.title;
   // chỉnh lại một chút const imgUrl = req.file.filename;
   const imgUrl = req.body.imgUrl;
@@ -117,6 +112,54 @@ app.post('/admin/products', upload, (req, res, next) => {
       const error = new Error("failed to insert supplier document");
       error.status = 400;
       next(error);
+    });
+});
+
+app.get('/admin/product/:id', (req, res, next) => {
+  const prodId = req.params.id;
+  Product.findById(prodId)
+    .then(product => {
+      res.json(product);
+    })
+    .catch(err => res.json(err));
+});
+
+app.get('/admin/getAllProducts', (req, res, next) => {
+  let pageNo = parseInt(req.query.pageNo);
+  let size = parseInt(req.query.size);
+  let query = {};
+  if (pageNo < 0 || pageNo === 0) {
+    pageNo = 1;
+  }
+  query.skip = size * (pageNo - 1);
+  query.limit = size;
+  Product.find({}, {}, query, (err, docs) => {
+    if (err) {
+      console.log(err);
+       res.status(400).json({err});
+    } 
+     res.json(docs);
+  });
+})
+
+app.put('/admin/product/:id', upload, (req, res, next) => {
+  const prodId = req.params.id;
+
+  const updatedProduct = req.body.data;
+  console.log(req.body);
+  if (req.file) {
+    updatedProduct.imgUrl = req.file.filename;
+  }
+  console.log('update product');
+  console.log(updatedProduct);
+  Product.findByIdAndUpdate(prodId, req.body
+  )
+    .then(result => {
+      res.json(result);
+    })
+    .catch(err => {
+      console.log(err);
+      res.json(err);
     });
 });
 
