@@ -14,7 +14,7 @@ const app = express();
 app.use(logger('dev'));
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -142,26 +142,34 @@ app.get('/admin/getAllProducts', (req, res, next) => {
   });
 })
 
-app.put('/admin/product/:id', upload, (req, res, next) => {
+app.put('/admin/product/:id', (req, res, next) => {
   const prodId = req.params.id;
-
-  const updatedProduct = req.body.data;
-  console.log(req.body);
-  if (req.file) {
-    updatedProduct.imgUrl = req.file.filename;
-  }
-  console.log('update product');
+  const updatedProduct = req.body;
+  console.log("log product receive from front end");
   console.log(updatedProduct);
-  Product.findByIdAndUpdate(prodId, req.body
-  )
-    .then(result => {
-      res.json(result);
-    })
-    .catch(err => {
+  Product.findByIdAndUpdate(prodId, updatedProduct, (err, doc) => {
+    if (err) {
+      console.log('catch error update');
       console.log(err);
-      res.json(err);
-    });
+      return res.json(err);
+    }
+    console.log(doc);
+    return res.json(doc);
+  });
 });
+
+app.delete('/admin/product/:id', (req, res, next) => {
+  const productId = req.params.id;
+  console.log(params);
+  console.log(productId);
+  Product.findByIdAndDelete(productId,(err, doc) => {
+    if (err) {
+      console.log(err);
+      return res.json(err);
+    }
+    return res.json(doc);
+  });
+})
 
 app.use((req, res, next) => {
   User.findById('5d96e3e3e272b738281a4d8e')

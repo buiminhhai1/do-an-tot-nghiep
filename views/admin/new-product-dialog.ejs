@@ -52,24 +52,23 @@
 		</div>
 	</div>
 </div>
- <!-- <script src="../../handlers/product/productHandlers.js"></script> -->
- <script>
- $(document).ready(() =>{
+<script>
+  $(document).ready(() =>{
     // handle for create and edit button click
     $('.closemodal').on('click',()=>{
-        $('#my-product-dialog-new').modal('toggle');
-        $(".modal-backdrop").remove();
-    })
+      $('#my-product-dialog-new').modal('toggle');
+      $(".modal-backdrop").remove();
+    });
      
-    $(document).keyup(function(e) {
-        if (e.key === "Escape") { // escape key maps to keycode `27`
-            $(".modal-backdrop").remove();
-        }
+    $(document).keyup((e) => {
+      if (e.key === "Escape") { // escape key maps to keycode `27`
+        $(".modal-backdrop").remove();
+      }
     }); 
 
-     $(".custom-file-input").on("change", function() {
-    let fileName = $(this).val().split("\\").pop();
-    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    $(".custom-file-input").on("change", () => {
+      let fileName = $(this).val().split("\\").pop();
+      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
     });
 
     // variable for CRUD and Create, update form.
@@ -83,49 +82,62 @@
     const barcode = $("#barcode");
     const description = $("#description");
     const closemodal = $("#closemodal");
-
     const modalNew = $("#my-product-dialog-new");
-  //   const modalEdit = $("#my-product-dialog-edit");
+    
+    // api getProdudc with pageNo, size
     const getProducts = (pageNo,size) => {
-      fetch(`/admin/getAllProducts?pageNo=${pageNo}&size=${size}`, {method: "get"})
-          .then(response => response.json())
-          .then(data =>{
-            displayProduct(data, pageNo, size);
-          });
+      fetch(`/admin/getAllProducts?pageNo=${ pageNo }&size=${ size }`, { method: "get" })
+        .then(response => response.json())
+        .then(data => {
+          displayProduct(data, pageNo, size);
+      });
     }
-    getProducts(1,5);
+    getProducts(1,10);
 
-   $('#show_paginator').bootpag({
-        total: 10,
-        page: 1,
-        maxVisible: 5
+    $('#show_paginator').bootpag({
+      total: 10,
+      page: 1,
+      maxVisible: 10
     }).on('page', function(event, num){
-      getProducts(num,5);
+      getProducts(num,10);
     });
 
-  const buildTemplate = (product, ids) =>{
-    return `
-      <tr id="${ids.listItemID}">
-      <td>${ids.stt}</td>
-      <td id="${ids.productID}">${product.title}</td>
-      <td id="${ids.imgUrl}">${product.imgUrl}</td>
-      <td id="${ids.price}">${product.price}</td>
-      <td id="${ids.price}">${product.barcode}</td>
-      <td class="text-wrap" id="${ids.description}">${product.description}</td>
-      <td><div class="text-right">
-                  <button type="button" class="btn btn-secondary" id="${ids.editID}" data-toggle="modal" data-target="#my-product-dialog-new">Edit</button>
-                  <button type="button" class="btn btn-danger" id="${ids.deleteID}">Delete</button>
-              </div> </td>
-      </tr>
+    // buildTemplate to show in table
+    const buildTemplate = (product, ids) =>{
+      
+      return `
+        <tr id="${ids.listItemID}">
+          <td>${ids.stt}</td>
+          <td id="${ids.productID}">${product.title}</td>
+          <td id="${ids.imgUrl}"><img style="height:40px; width:40px;" id="${ids.imgUrl}img" src=${product.imgUrl} /></td>
+          <td id="${ids.price}">${product.price}</td>
+          <td id="${ids.barcode}">${product.barcode}</td>
+          <td class="text-wrap" id="${ids.description}">${product.description}</td>
+          <td>
+            <div class="text-right">
+              <button type="button" class="btn btn-secondary"
+                id="${ids.editID}"
+                data-toggle="modal"
+                data-target="#my-product-dialog-new"
+              >Edit
+              </button>
+              <button type="button" class="btn btn-danger"
+                id="${ids.deleteID}">Delete
+              </button>
+            </div>
+          </td>
+        </tr>
       `;
-  }
+    }
 
+    // build Id for itemList to know for delete or edit
     const buildIDS = (product, page, size, index) => {
       return {
-        stt: (page - 1) * size + index+1,
+        stt: (page - 1) * size + index + 1,
         listItemID: "listItem_" + product._id,
         productID: "product_" + product._id,
         title: "title_" + product._id,
+        barcode: "barcode_" + product._id,
         description: "description_" + product._id,
         imgUrl: "imgUrl_" + product._id,
         price: 'price_' + product._id,
@@ -136,79 +148,77 @@
 
     // handle display product.
     const displayProduct = (data, page, size) => {
-        display.empty();
-        data.forEach((product, index) => {
-            let ids = buildIDS(product, page, size, index);
-            display.append(buildTemplate(product, ids));
-            editProduct(product, ids);
-            // deleteproduct(product, ids);
-        });
+      display.empty();
+      data.forEach((product, index) => {
+        let ids = buildIDS(product, page, size, index);
+        display.append(buildTemplate(product, ids));
+        editProduct(product, ids);
+        // deleteproduct(product, ids);
+      });
    }
 
    // handle reset product Input fields
-  resetproductInput = () =>{ 
-    titleProduct.val('');
-    $('.custom-file-label')[0].innerText='';
-    $('#imgUrl').val('')
-    price.val('');
-    barcode.val('');
-    description.val('');
-  }
+    resetproductInput = () => { 
+      titleProduct.val('');
+      $('.custom-file-label')[0].innerText='';
+      $('#imgUrl').val('')
+      price.val('');
+      barcode.val('');
+      description.val('');
+    }
 
-  
     // handle submit create product
-   form.submit((e) =>{
-       e.preventDefault();
-        const formd = $('#form')[0];
-        const formData = new FormData(formd);
-        const json = JSON.stringify({
-          title: titleProduct.val(),
-          price: price.val(),
-          barcode: barcode.val(),
-          description: description.val(),
-          imgUrl: imgUrl.val()});
-        formData.append('file', $('#imgUrl'));
-        formData.append('data',json);
-        fetch('/admin/products', {
-          method: 'post',
-          headers : {
-            "Content-Type" : "application/json; charset=utf-8"
-          },
-          body: json
-       })
-       .then((response) =>{
-           return response.json();
-       })
-       .then(data =>{
-           if(!data.error){
-            
-           }
-           modalNew.removeAttr("display");
-           modalNew.attr("display","none");
-           closemodal.trigger("click");
-           $(".modal-backdrop").remove();
-           resetproductInput();
-           
-       });
+    form.submit((e) =>{
+    e.preventDefault();
+    // let formd = $('#form')[0];
+    // let formData = new FormData(formd);
+    const json = JSON.stringify({
+      title: titleProduct.val(),
+      price: price.val(),
+      barcode: barcode.val(),
+      description: description.val(),
+      imgUrl: imgUrl.val()
     });
+    // formData.append('file', $('#imgUrl'));
+    // formData.append('data',json);
+    fetch('/admin/products', {
+      method: 'post',
+      headers : {
+        "Content-Type" : "application/json; charset=utf-8"
+      },
+      body: json
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then(data => {
+      if (!data.error) {}
+      modalNew.removeAttr("display");
+      modalNew.attr("display","none");
+      closemodal.trigger("click");
+      $(".modal-backdrop").remove();
+      resetproductInput();
+      getProducts(1, 10);
+    });
+  });
 
     // wait modalNew add class show, if modalNew has class show, in some case, style{display:none}
     //therefore dialog not show
     $('#createNew').click(()=>{
+      resetproductInput();
       titleForm.text('Thêm mới sản phẩm');
-          buttonName.text('Thêm mới');
-        setTimeout(() => {
-          
-            if(modalNew.hasClass('show')){
-                modalNew.css("display","block");
-            }
-        
-        }, 1000);
+      buttonName.text('Thêm mới');
+      setTimeout(() => {  
+        if(modalNew.hasClass('show')){
+          modalNew.css("display","block");
+        }
+      }, 1000);
     });
     
     const editProduct = (product, ids) => {
       let editBtn = $(`#${ids.editID}`);
-      editBtn.click(()=>{
+
+      editBtn.click(() => {
         titleForm.text('Cập nhật sản phẩm');
         buttonName.text('Cập nhật');
         fetch(`/admin/product/${product._id}`, { method: "get" })
@@ -219,57 +229,65 @@
             await price.val(`${data.price}`);
             await barcode.val(`${data.barcode}`);
             await description.text(`${data.description}`);
-            
             $("#my-product-dialog-new").css("display","block");
           });
           // after form shown and user input value and then click "Cap nhat" button
           // handle submit "Cap nhat" button
-          form.submit((e) => {
+          form.unbind("submit").submit((e) => {
             e.preventDefault();
-            const formd = $('#form')[0];
-            const formData = new FormData(formd);
+            // const formData = new FormData(formd);
+            // formData.append('test', 'test');
             const json = JSON.stringify({
               title: titleProduct.val(),
               price: price.val(),
               barcode: barcode.val(),
               description: description.val(),
-              imgUrl: imgUrl.val()});
-            formData.append('file', $('#imgUrl'));
-            formData.append('data',json);
-            console.log(formData);
+              imgUrl: imgUrl.val()
+            });
+            console.log('data update value');
+            
+            console.log(json);
+            
             fetch(`/admin/product/${product._id}`,{
                 method: "put",
-                body: formData
-            }).then((response)=>{
-                return response.json();
-            }).then((data)=>{
-                if(data.ok == 1){
+                headers : {
+                  "Content-Type" : "application/json; charset=utf-8"
+                },
+                body: json
+            })
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+              if (data){
                   // Display new data.
-                  console.log(data);
-                  let productIndex = $(`#${ids.productID}`);
-                  productIndex.html(data.value.title); 
-                  let emailphone = $(`#${ids.emailphone}`);
-                  emailphone.html(data.value.email + ", " + data.value.phone);
-                  let phone = $(`#${ids.address}`);
-                  phone.html(data.value.address);
-                  
+                  const productIndex = $(`#${ids.productID}`);
+                  productIndex.text(titleProduct.val() ? titleProduct.val() : data.title);
+                  const nimgUrl = $(`#${ids.imgUrl}img`);
+                   nimgUrl.attr('src', imgUrl.val() ? imgUrl.val() : data.imgUrl);
+                  const nprice = $(`#${ids.price}`);
+                  nprice.text(price.val() ? price.val() : data.price);
+                  const nbarcode = $(`#${ids.barcode}`);
+                  nbarcode.text(barcode.val() ? barcode.val() : data.barcode);
+                  const ndescription = $(`#${ids.description}`);
+                  ndescription.text(description.val() ? description.val() : data.description);                  
                   // Hide modal
                   modalNew.removeAttr("display");
                   modalNew.attr("display","none");
-                  editClose.trigger("click");
                   $(".modal-backdrop").remove();
-                
-                // get messsage here
-                }else{
-                // get message here
-                }
-              });
+              
+              // get messsage here
+              }else{
+              // get message here
+              }
               })
-            
-            });
-            }
-
-  
+              .catch(err => console.log(err));
+          })
+      
+        }
+      )
+    }
 });
 
 </script>
