@@ -1,3 +1,4 @@
+const Product = require('../models/product');
 const express = require('express');
 const adminController = require('../controllers/admin');
 const router = express.Router();
@@ -5,13 +6,16 @@ const router = express.Router();
 // /admin/products => GET
 router.get('/products', adminController.getProducts);
 
+router.post('/product', adminController.createProduct);
 
+router.get('/getProducts', adminController.getPagProducts)
 
-// /admin/add-product => GET
-// router.get('/add-product', adminController.getAddProduct);
+router.get('/product/:id', adminController.getDetailProduct);
 
-// // /admin/add-product => POST
-// router.post('/add-product', adminController.postAddProduct);
+router.put('/product/:id', adminController.putProduct);
+
+router.delete('/product/:id', adminController.deleteProduct);
+
 module.exports = router;
 
 

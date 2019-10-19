@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const notFound = require('./controllers/404');
 const User = require('./models/user');
 const Product = require('./models/product');
+const constant = require('./utils/constant');
 const app = express();
 app.use(logger('dev'));
 
@@ -30,35 +31,11 @@ const storage = multer.diskStorage({
   }
 });
 
-// Init Upload
-const upload = multer({
-  storage: storage,
-  limits:{fileSize: 1000000},
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  }
-}).single('myImage');
-
-// Check File Type
-function checkFileType(file, cb) {
-  // Allowed ext
-  const filetypes = /jpeg|jpg|png|gif/;
-  // Check ext
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check mime
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (mimetype && extname) {
-    return cb(null,true);
-  } else {
-    cb('Error: Images Only!');
-  }
-}
-
 mongoose
-  .connect(
-    'mongodb+srv://admin:admin@cluster0-zvyb6.mongodb.net/products'
-  )
+  .connect(constant.CONNECTION_STRING, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then((result) => {
     console.log('Connected database!');
     User.findOne().then(user => {
@@ -83,93 +60,6 @@ mongoose
 
 
 const adminData = require('./routes/admin');
-
-app.post('/admin/products', upload, (req, res, next) => {
-  console.log('access app.js!');
-  const title = req.body.title;
-  // chỉnh lại một chút const imgUrl = req.file.filename;
-  const imgUrl = req.body.imgUrl;
-  const price = req.body.price;
-  const barcode = req.body.barcode;
-  const description = req.body.description;
-
-  const product = new Product({
-    title,
-    imgUrl,
-    price,
-    barcode,
-    description
-  });
-  console.log(product);
-
-  product.save()
-    .then((result) => {
-      console.log("create product");
-      res.json(product);
-    })
-    .catch(err => {
-      console.log(err);
-      const error = new Error("failed to insert supplier document");
-      error.status = 400;
-      next(error);
-    });
-});
-
-app.get('/admin/product/:id', (req, res, next) => {
-  const prodId = req.params.id;
-  Product.findById(prodId)
-    .then(product => {
-      res.json(product);
-    })
-    .catch(err => res.json(err));
-});
-
-app.get('/admin/getAllProducts', (req, res, next) => {
-  let pageNo = parseInt(req.query.pageNo);
-  let size = parseInt(req.query.size);
-  let query = {};
-  if (pageNo < 0 || pageNo === 0) {
-    pageNo = 1;
-  }
-  query.skip = size * (pageNo - 1);
-  query.limit = size;
-  Product.find({}, {}, query, (err, docs) => {
-    if (err) {
-      console.log(err);
-       res.status(400).json({err});
-    } 
-     res.json(docs);
-  });
-})
-
-app.put('/admin/product/:id', (req, res, next) => {
-  const prodId = req.params.id;
-  const updatedProduct = req.body;
-  console.log("log product receive from front end");
-  console.log(updatedProduct);
-  Product.findByIdAndUpdate(prodId, updatedProduct, (err, doc) => {
-    if (err) {
-      console.log('catch error update');
-      console.log(err);
-      return res.json(err);
-    }
-    console.log(doc);
-    return res.json(doc);
-  });
-});
-
-app.delete('/admin/product/:id', (req, res, next) => {
-  const productId = req.params.id;
-  console.log(params);
-  console.log(productId);
-  Product.findByIdAndDelete(productId,(err, doc) => {
-    if (err) {
-      console.log(err);
-      return res.json(err);
-    }
-    return res.json(doc);
-  });
-})
 
 app.use((req, res, next) => {
   User.findById('5d96e3e3e272b738281a4d8e')
