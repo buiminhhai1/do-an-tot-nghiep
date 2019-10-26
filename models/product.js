@@ -15,6 +15,10 @@ const productSchema = new Schema({
     type: Number,
     required: true
   },
+  numbers: {
+    type: Number,
+    required: true
+  },
   barcode: {
     type: String,
     required: true
@@ -22,6 +26,18 @@ const productSchema = new Schema({
   description: {
     type: String,
     required: true
+  },
+  position: {
+    type: Object,
+    required: true
+  },
+  createInfo: {
+    type: Object,
+    required: true
+  },
+  updateInfo: {
+    type: Object, 
+    required: false
   }
 });
 

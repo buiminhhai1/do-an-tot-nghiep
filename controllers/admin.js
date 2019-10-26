@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Store = require('../models/store');
 
 exports.getProducts = (req, res, next) => {
   res.render('admin/products',{
@@ -7,36 +8,6 @@ exports.getProducts = (req, res, next) => {
   });
 };
 
-exports.createProduct =  (req, res, next) => {
-  console.log('access app.js!');
-  const title = req.body.title;
-  // chỉnh lại một chút const imgUrl = req.file.filename;
-  const imgUrl = req.body.imgUrl;
-  const price = req.body.price;
-  const barcode = req.body.barcode;
-  const description = req.body.description;
-
-  const product = new Product({
-    title,
-    imgUrl,
-    price,
-    barcode,
-    description
-  });
-  console.log(product);
-
-  product.save()
-    .then((result) => {
-      console.log("create product");
-      res.json(product);
-    })
-    .catch(err => {
-      console.log(err);
-      const error = new Error("failed to insert supplier document");
-      error.status = 400;
-      next(error);
-    });
-};
 
 exports.getPagProducts = (req, res, next) => {
   let pageNo = parseInt(req.query.pageNo);
@@ -60,6 +31,7 @@ exports.getDetailProduct = (req, res, next) => {
   const prodId = req.params.id;
   Product.findById(prodId)
     .then(product => {
+      console.log(product);
       res.json(product);
     })
     .catch(err => res.json(err));

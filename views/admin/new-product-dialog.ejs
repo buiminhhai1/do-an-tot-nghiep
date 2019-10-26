@@ -1,11 +1,11 @@
 <div class="modal fade" id="my-product-dialog-new" tabindex="-1">
-	<div class="modal-dialog">
+	<div style="overflow: initial !important;" class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h3 id="title-form">Thêm mới sản phẩm</h2>
 			</div>
-			<form id="form-add" method="POST" enctype="multipart/form-data">
-				<div class="modal-body ">
+			<form id="form-add" method="POST" enctype="multipart/form-data" >
+				<div class="modal-body" style="height: 500px; overflow-y: auto;">
 					<div class="form-row">
 						<div class="col-md-7 col-mb-1">
 							<label for="titleProduct">Tên sản phẩm</label>
@@ -14,13 +14,13 @@
           </div>
           <br>
 					<div class="form-row">
-						<div class="col-md-12">
-							<label for="imgUrl">Ảnh sản phẩm</label>
-							<div class="custom-file">
-								<input type="file" name="myImage" class="custom-file-input" id="imgUrl"/>
-								<label class="custom-file-label" for="new-product-avatar">Choose file</label>
-							</div>
-						</div>
+            <div class="col-md-12">
+              <label for="image">Ảnh sản phẩm</label>
+              <div class="custom-file">
+                <input type="file" name="myImage" class="custom-file-input" id="image"/>
+                <label class="custom-file-label" for="image">Choose file</label>
+              </div>
+            </div>
           </div>
           <br>
 					<div class="form-row">
@@ -34,6 +34,13 @@
 						<div class="col-md-12">
 							<label for="price">Giá</label>
 							<input type="number" class="form-control" id="price" value="" placeholder="Giá" />
+						</div>
+          </div>
+          <br>
+          <div class="form-row">
+						<div class="col-md-12">
+							<label for="numbers">Số lượng</label>
+							<input type="number" class="form-control" id="numbers" value="" placeholder="Giá" />
 						</div>
 					</div>
           <br>
@@ -52,6 +59,7 @@
 		</div>
 	</div>
 </div>
+
 <script>
   $(document).ready(() =>{
     // handle for create and edit button click
@@ -66,24 +74,28 @@
       }
     }); 
 
-    $(".custom-file-input").on("change", () => {
-      let fileName = $(this).val().split("\\").pop();
-      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-    });
-
     // variable for CRUD and Create, update form.
     const titleForm = $('#title-form');
     const buttonName = $('#name-button');
     const display = $("#display") ;
     const form = $("#form-add");
     const titleProduct = $("#titleProduct");
-    const imgUrl = $("#imgUrl");
+    const imgUrl = $("#image");
     const price = $("#price");
+    const numbers = $('#numbers');
     const barcode = $("#barcode");
     const description = $("#description");
     const closemodal = $("#closemodal");
     const modalNew = $("#my-product-dialog-new");
-    
+    const spinner = $('#spinner');
+
+    spinner.hide();
+
+    $(".custom-file-input").on("change", function() {
+      const fileName = $(this).val().split("\\").pop();
+      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+
     // api getProdudc with pageNo, size
     const getProducts = (pageNo,size) => {
       fetch(`/admin/getProducts?pageNo=${ pageNo }&size=${ size }`, { method: "get" })
@@ -109,12 +121,19 @@
         <tr id="${ids.listItemID}">
           <td>${ids.stt}</td>
           <td id="${ids.productID}">${product.title}</td>
-          <td id="${ids.imgUrl}"><img style="height:40px; width:40px;" id="${ids.imgUrl}img" src=${product.imgUrl} /></td>
+          <td id="${ids.imgUrl}"><img style="height:40px; width:40px;" id="${ids.imgUrl}img" src="/${product.imgUrl}" /></td>
           <td id="${ids.price}">${product.price}</td>
+          <td id="${ids.numbers}">${product.numbers}</td>
           <td id="${ids.barcode}">${product.barcode}</td>
           <td class="text-wrap" id="${ids.description}">${product.description}</td>
           <td>
             <div class="text-right">
+              <button type="button" class="btn btn-secondary"
+                id="${ids.detailID}"
+                data-toggle="modal"
+                data-target="#my-product-dialog-detail"
+              >Detail
+              </button>
               <button type="button" class="btn btn-secondary"
                 id="${ids.editID}"
                 data-toggle="modal"
@@ -141,8 +160,10 @@
         description: "description_" + product._id,
         imgUrl: "imgUrl_" + product._id,
         price: 'price_' + product._id,
+        numbers: 'numbers_' + product._id,
         editID: "edit_" + product._id,
-        deleteID: "delete_" + product._id
+        deleteID: "delete_" + product._id,
+        detailID: "detail_" + product._id
       }
     }
 
@@ -152,6 +173,7 @@
       data.forEach((product, index) => {
         let ids = buildIDS(product, page, size, index);
         display.append(buildTemplate(product, ids));
+        detailProduct(product, ids);
         editProduct(product, ids);
         deleteProduct(product, ids);
       });
@@ -160,38 +182,41 @@
    // handle reset product Input fields
     resetproductInput = () => { 
       titleProduct.val('');
-      $('.custom-file-label')[0].innerText='';
-      $('#imgUrl').val('')
+      $('.custom-file-label')[0].innerText='Browser File';
+      $('#image').val('')
       price.val('');
       barcode.val('');
       description.val('');
+      numbers.val('');
     }
 
     // handle submit create product
-    form.submit((e) =>{
+    form.submit( (e) => {
     e.preventDefault();
-    // let formd = $('#form')[0];
-    // let formData = new FormData(formd);
+    let formd = $('#form-add')[0];
+    let formData = new FormData(formd);
     const json = JSON.stringify({
       title: titleProduct.val(),
       price: price.val(),
       barcode: barcode.val(),
-      description: description.val(),
-      imgUrl: imgUrl.val()
+      numbers: numbers.val(),
+      description: description.val()
     });
-    // formData.append('file', $('#imgUrl'));
-    // formData.append('data',json);
+    formData.append('file', $('#image'));
+    formData.append('data', json);
+    // show spinner and backdrop
+    spinner.show();
+    $('#spnnier-backdrop').addClass('modal-backdrop');
     fetch('/admin/product', {
-      method: 'post',
-      headers : {
-        "Content-Type" : "application/json; charset=utf-8"
-      },
-      body: json
+      method: 'POST',
+      body: formData,
     })
     .then((response) => {
       return response.json();
     })
     .then(data => {
+      spinner.hide();
+      $('#spnnier-backdrop').removeClass('modal-backdrop');
       if (!data.error) {}
       modalNew.removeAttr("display");
       modalNew.attr("display","none");
@@ -199,7 +224,7 @@
       $(".modal-backdrop").remove();
       resetproductInput();
       getProducts(1, 10);
-    });
+    }); 
   });
 
     // wait modalNew add class show, if modalNew has class show, in some case, style{display:none}
@@ -215,6 +240,32 @@
       }, 1000);
     });
     
+    const detailProduct = (product, ids) => {
+      let detailBtn = $(`#${ids.detailID}`);
+      detailBtn.click(() => {
+        
+        $('#title-form-detail').text('Chi tiết sản phẩm');
+        fetch(`/admin/product/${product._id}`, { method: "get" })
+          .then(response => response.json())
+          .then(async (data) => {
+            await $('#titleProductDetail').val(`${data.title}`);
+            await $('#imgUrlDetail').attr("src",`/${data.imgUrl}`);
+            await $('#priceDetail').val(`${data.price}`);
+            await $('#numbersDetail').val(`${data.numbers}`);
+            await $('#barcodeDetail').val(`${data.barcode}`);
+            await $('#descriptionDetail').text(`${data.description}`);
+            let tempString = '';
+            await data.position.forEach(value => {
+              tempString = tempString.concat(`row: ${value.row.toString()} floor: ${value.floor} index: ${value.index} \n`);
+            })
+
+            await $('#positionDetail').text(`${tempString}`);
+            await $('#createDetail').text(`${data.createInfo.createTime}`);
+            $("#my-product-dialog-detail").css("display","block");
+          });
+      })
+    }
+
     const editProduct = (product, ids) => {
       
       let editBtn = $(`#${ids.editID}`);
