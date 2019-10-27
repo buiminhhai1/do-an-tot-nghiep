@@ -51,7 +51,7 @@ const upload = multer({
   }
 }).single('myImage');
 
-app.post('/admin/product', upload, (req, res, next) => {  
+app.post('/admin/product', upload,async (req, res, next) => {  
   const objProduct = JSON.parse(req.body.data);
   const title = objProduct.title;
   const price = objProduct.price;
@@ -62,53 +62,85 @@ app.post('/admin/product', upload, (req, res, next) => {
   if (req.file) {
     imgUrl = req.file.filename
   }
-  Product.findOne({barcode: barcode}, (err, existProduct) => {
-    if (existProduct) {
-    } else {
+  let positionList;
+  try{
+    const product = await Product.findOne({barcode: barcode});
+    if (product) { // sản phẩm đã tồn tại.
+      positionList = await Store.find({ isEmpty: true }).limit(numbers);
+      console.log(positionList);
+      const posList = positionList.map(item => {
+        return {
+          row: item.row,
+          floor: item.floor,
+          index: item.index
+        };
+      });
+      let tempArr = [...product.position];
+      tempArr = tempArr.concat(posList);
+      product.position = tempArr;
+      console.log('product');
+      console.log(product);
+      product.numbers = product.numbers + numbers;
+      const result = await product.save();
+      positionList.forEach(item => {
+        item.isEmpty = false;
+        item.barcode = product.barcode;
+      });
+      for (let i = 0; i < positionList.length; i++) {
+        await positionList[i].save();
+      }
+      console.log(positionList);
+      // await positionList.save();
+      console.log(result);
+      res.json({
+        "message": "Update product success",
+        result: result
+      });
+    }  else {
       const createInfo = {};
       const createTime = new Date();
       createInfo.createTime = createTime;
-
-      Store.find({}, {}, {limit: numbers}, (err, posList) => {
-        if (err) {
-          console.log('not found position list'); 
-          return res.json(err);
-        } 
-        const positionList = posList.map(item => {
-          return {
-             row: item.row,
-             floor: item.floor,
-             index: item.index
-            };
-         });
-         console.log("list position");
-         console.log(positionList);
-         const newProduct = new Product({
-          title,
-          imgUrl,
-          price,
-          numbers,
-          barcode,
-          description,
-          position: positionList,
-          createInfo
-        });
-        newProduct.save( {} ,(err, product) => {
-          if (!err) {
-            console.log('create new product sucess');
-            console.log(product);
-            res.json({
-              'message': 'Create product sucess',
-              ...product
-            }); 
-          } else {
-            console.log('create fail');
-            console.log(err);
-          }
-        });  
-      })
+      positionList = await Store.find({ isEmpty: true }).limit(numbers);
+      console.log(positionList);
+      const posList = positionList.map(item => {
+        return {
+          row: item.row,
+          floor: item.floor,
+          index: item.index
+        };
+      });
+      const newProduct = new Product({
+        title,
+        imgUrl,
+        price,
+        numbers,
+        barcode,
+        description,
+        position: posList,
+        createInfo
+      });
+      const result =  await newProduct.save();
+      positionList.forEach(item => {
+        item.isEmpty = false;
+        item.barcode = barcode;
+      });
+      
+      for (let i = 0; i < positionList.length; i++) {
+        await positionList[i].save();
+      }
+      console.log(positionList);
+      // await positionList.save();
+      console.log(result);
+      res.json({
+        'message': 'Create product success',
+        ...result
+      });
     }
-  });
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
 });
 
 app.use(bodyParser.json());

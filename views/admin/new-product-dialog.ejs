@@ -40,7 +40,7 @@
           <div class="form-row">
 						<div class="col-md-12">
 							<label for="numbers">Số lượng</label>
-							<input type="number" class="form-control" id="numbers" value="" placeholder="Giá" />
+							<input type="number" class="form-control" id="numbers" value="" placeholder="Số lượng" />
 						</div>
 					</div>
           <br>
@@ -243,8 +243,8 @@
     const detailProduct = (product, ids) => {
       let detailBtn = $(`#${ids.detailID}`);
       detailBtn.click(() => {
-        
         $('#title-form-detail').text('Chi tiết sản phẩm');
+
         fetch(`/admin/product/${product._id}`, { method: "get" })
           .then(response => response.json())
           .then(async (data) => {
@@ -344,18 +344,21 @@
     const deleteProduct = (product, ids) =>{
       let deleteBtn = $(`#${ids.deleteID}`);
       deleteBtn.click(() => {
-        fetch(`/admin/product/${product._id}`,{
+        spinner.show();
+        $('#spnnier-backdrop').addClass('modal-backdrop');
+        fetch(`/admin/product/${product._id}/barcode/${product.barcode}`,{
           method: "delete"
         }).then(response =>{
             return response.json();
         }).then(data => {
+          spinner.hide();
+          $('#spnnier-backdrop').removeClass('modal-backdrop');
             if(data){
               $(`#${ids.listItemID}`).remove();
             }
         });
       });
-    }
-            
+    }   
   });
 
 </script>

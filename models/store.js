@@ -18,6 +18,10 @@ const storeSchema = new Schema({
   isEmpty: {
     type: Boolean,
     required: true
+  },
+  barcode: {
+    type: String,
+    required: false
   }
 });
 

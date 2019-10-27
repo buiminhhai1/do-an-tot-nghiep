@@ -53,15 +53,29 @@ exports.putProduct = (req, res, next) => {
   });
 };
 
-exports.deleteProduct = (req, res, next) => {
+exports.deleteProduct = async (req, res, next) => {
+  
   const productId = req.params.id;
-  console.log(req.params);
-  console.log(productId);
-  Product.findByIdAndDelete(productId,(err, doc) => {
-    if (err) {
-      console.log(err);
-      return res.json(err);
+  
+  const barcode = req.params.barcode;
+  console.log('barcode');
+  console.log(barcode);
+  try{
+    const positionList = await Store.find({barcode: barcode});
+    // positionList.forEach(item => {
+    //   delete item.barcode;
+    //   item.isEmpty = true;
+    // });
+    for (let i = 0; i < positionList.length; i++) {
+      positionList[i].barcode = null;
+      positionList[i].isEmpty = true;
+      await positionList[i].save();
     }
-    return res.json(doc);
-  });
+    const result = await Product.findByIdAndDelete(productId);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
 };

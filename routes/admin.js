@@ -110,7 +110,7 @@ router.get('/product/:id', adminController.getDetailProduct);
 
 router.put('/product/:id', adminController.putProduct);
 
-router.delete('/product/:id', adminController.deleteProduct);
+router.delete('/product/:id/barcode/:barcode', adminController.deleteProduct);
 
 // /admin/products => GET
 router.get('/products', adminController.getProducts);
