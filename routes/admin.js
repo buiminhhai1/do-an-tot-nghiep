@@ -3,6 +3,8 @@ const multer = require('multer');
 const adminController = require('../controllers/admin');
 const router = express.Router();
 // ---------------- GET HERE ------------------
+router.get('/', adminController.getAdminPage);
+
 router.get('/getProducts', adminController.getPagProducts)
 
 router.get('/allProducts', adminController.getAllProducts);

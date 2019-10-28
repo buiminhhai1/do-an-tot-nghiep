@@ -1,5 +1,12 @@
 const Product = require('../models/product');
 const Store = require('../models/store');
+// redicrect to view 
+exports.getAdminPage = (req, res, next) => {
+  res.render('admin/products',{
+    pageTitle: "Tất cả sản phẩm",
+    path: '/admin/products'
+  });
+};
 // get view all product
 exports.getProducts = (req, res, next) => {
   res.render('admin/products',{

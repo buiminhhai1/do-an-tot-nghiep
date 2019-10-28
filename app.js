@@ -11,6 +11,7 @@ const constant = require('./utils/constant');
 
 const adminRouter = require('./routes/admin');
 const userRouter = require('./routes/user');
+const indexRouter = require('./routes/index');
 const app = express();
 app.use(passport.initialize());
 require('./authentication/passport');
@@ -155,6 +156,7 @@ app.set('views', 'views');
 
 app.use('/admin', adminRouter);
 app.use('/user', userRouter)
+app.use('/', indexRouter);
 app.use(notFound.notFound);
 
 mongoose
