@@ -1,6 +1,6 @@
 const Product = require('../models/product');
 const Store = require('../models/store');
-
+// get view all product
 exports.getProducts = (req, res, next) => {
   res.render('admin/products',{
     pageTitle: "Tất cả sản phẩm",
@@ -8,8 +8,7 @@ exports.getProducts = (req, res, next) => {
   });
 };
 
-
-exports.getPagProducts = (req, res, next) => {
+exports.getPagProducts = async (req, res, next) => {
   let pageNo = parseInt(req.query.pageNo);
   let size = parseInt(req.query.size);
   let query = {};
@@ -18,54 +17,73 @@ exports.getPagProducts = (req, res, next) => {
   }
   query.skip = size * (pageNo - 1);
   query.limit = size;
-  Product.find({}, {}, query, (err, docs) => {
-    if (err) {
-      console.log(err);
-       res.status(400).json({err});
-    } 
-     res.json(docs);
-  });
+  try{
+    const result = await Product.find({}, {}, query);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
 };
 
-exports.getDetailProduct = (req, res, next) => {
+exports.getAllProducts = async (req, res, next) => {
+  try {
+    const result = await Product.find();
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
+};
+
+exports.getDetailProduct = async (req, res, next) => {
   const prodId = req.params.id;
-  Product.findById(prodId)
-    .then(product => {
-      console.log(product);
-      res.json(product);
-    })
-    .catch(err => res.json(err));
+  try {
+    const result = await Product.findById(prodId)
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
 };
 
-exports.putProduct = (req, res, next) => {
+exports.getDetailProductByBarcode = async (req, res, next) => {
+  const barcode = req.params.barcode;
+  try {
+    const result = await Product.find({ barcode: barcode });
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
+};
+
+
+
+exports.putProduct = async (req, res, next) => {
   const prodId = req.params.id;
   const updatedProduct = req.body;
-  console.log("log product receive from front end");
-  console.log(updatedProduct);
-  Product.findByIdAndUpdate(prodId, updatedProduct, (err, doc) => {
-    if (err) {
-      console.log('catch error update');
-      console.log(err);
-      return res.json(err);
-    }
-    console.log(doc);
-    return res.json(doc);
-  });
+  try {
+    const reuslt = await Product.findByIdAndUpdate(prodId, updatedProduct);
+    res.json(doc);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
 };
 
 exports.deleteProduct = async (req, res, next) => {
-  
   const productId = req.params.id;
-  
   const barcode = req.params.barcode;
   console.log('barcode');
   console.log(barcode);
   try{
     const positionList = await Store.find({barcode: barcode});
-    // positionList.forEach(item => {
-    //   delete item.barcode;
-    //   item.isEmpty = true;
-    // });
     for (let i = 0; i < positionList.length; i++) {
       positionList[i].barcode = null;
       positionList[i].isEmpty = true;
