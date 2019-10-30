@@ -53,6 +53,7 @@ const upload = multer({
 }).single('myImage');
 
 app.post('/admin/product', upload,async (req, res, next) => {  
+  console.log('nó phi vào đây này.');
   const objProduct = JSON.parse(req.body.data);
   const title = objProduct.title;
   const price = objProduct.price;
@@ -137,6 +138,49 @@ app.post('/admin/product', upload,async (req, res, next) => {
         ...result
       });
     }
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+    next(err);
+  }
+});
+
+app.put('/admin/product/:id', upload, async (req, res, next) => {
+  console.log('Nhảy vào đây nè, edit product');
+  const prodId = req.params.id;
+  const objProduct = JSON.parse(req.body.data);
+  const title = objProduct.title;
+  const price = objProduct.price;
+  const barcode= objProduct.barcode;
+  const description = objProduct.description; 
+  let imgUrl;
+  if (req.file) {
+    imgUrl = req.file.filename
+  }
+  
+  try {
+    const pro = await Product.findById(prodId);
+    console.log('result find in edit');
+    console.log(pro);
+    pro.title = title;
+    // Nếu như barcode có sự thay đổi thì phải làm như sau.active
+    if (pro.barcode !== barcode) {
+      const positionList = await Store.find({barcode: pro.barcode});
+      for(let i = 0; i < positionList.length; i++) {
+        positionList[i].barcode = barcode;
+        await positionList[i].save();
+      }
+      pro.barcode = barcode;
+    }
+    pro.price = price;
+    if (imgUrl) {
+      pro.imgUrl = imgUrl;
+    }
+    pro.description = description;
+    console.log(pro);
+    const result = await pro.save();
+    console.log(result);
+    res.json(result);
   } catch (err) {
     console.log(err);
     res.json(err);

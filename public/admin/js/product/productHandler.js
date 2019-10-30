@@ -7,6 +7,7 @@ const titleProduct = $("#titleProduct");
 const imgUrl = $("#image");
 const price = $("#price");
 const numbers = $('#numbers');
+let oldNumbers;
 const barcode = $("#barcode");
 const description = $("#description");
 const closemodal = $("#closemodal");
@@ -43,8 +44,7 @@ const getProducts = async (pageNo,size) => {
     $('#spnnier-backdrop').removeClass('modal-backdrop');
     }
 };
-
-getProducts(1,10);
+getProducts(1, 10);
 
 // fix này lại sau
 $('#show_paginator').bootpag({
@@ -100,7 +100,7 @@ const buildIDS = (product, page, size, index) => {
     imgUrl: "imgUrl_" + product._id,
     price: 'price_' + product._id,
     numbers: 'numbers_' + product._id,
-    editID: "edit_" + product._id,
+    editID: product._id,
     deleteID: "delete_" + product._id,
     detailID: "detail_" + product._id
   }
@@ -155,7 +155,6 @@ form.submit(async (e) => {
     modalNew.removeAttr("display");
     modalNew.attr("display","none");
     closemodal.trigger("click");
-    $(".modal-backdrop").remove();
     resetproductInput();
     getProducts(1, 10);
     spinner.hide();
@@ -169,10 +168,11 @@ form.submit(async (e) => {
    
 });
 
-// wait modalNew add class show, if modalNew has class show, in some case, style{display:none}
-//therefore dialog not show
 $('#createNew').click(()=>{
   resetproductInput();
+  form.attr('method', 'POST');
+  numbers.attr('readonly', false);
+  numbers.attr('disabled', false);
   titleForm.text('Thêm mới sản phẩm');
   buttonName.text('Thêm mới');
   setTimeout(() => {  
@@ -181,6 +181,92 @@ $('#createNew').click(()=>{
     }
   }, 500);
 });
+
+
+const editProduct = (product, ids) => {
+  let editBtn = $(`#${ids.editID}`);
+  const prodId = `${ids.editID}`;
+  editBtn.click( async () => {
+    console.log('product edit');
+    console.log(product)
+    console.log(`#${ids.editID}`);
+    form.attr('method', 'PUT');
+    titleForm.text('Cập nhật sản phẩm');
+    buttonName.text('Cập nhật');
+    spinner.show();
+    $('#spnnier-backdrop').addClass('modal-backdrop');
+    try{
+      const result = await fetch(`/admin/product/${product._id}`, { method: "get" });
+      const data = await result.json();
+      titleProduct.val(`${data.title}`);
+      oldNumbers = data.numbers;
+      price.val(`${data.price}`);
+      numbers.attr('readonly', true);
+      numbers.attr('disabled', true);
+      numbers.val(`${data.numbers}`);
+      barcode.val(`${data.barcode}`);
+      description.text(`${data.description}`);
+      $("#my-product-dialog-new").css("display","block");
+      spinner.hide();
+      $('#spnnier-backdrop').removeClass('modal-backdrop');
+      form.unbind("submit").submit(async (e) => {
+        e.preventDefault();
+        console.log('log product after click');
+        console.log(prodId);
+        console.log('Nhảy vào edit product');
+        let formd = $('#form-add')[0];
+        let formData = new FormData(formd);
+        const json = JSON.stringify({
+          title: titleProduct.val(),
+          price: price.val(),
+          barcode: barcode.val(),
+          description: description.val()
+        });
+        formData.append('file', $('#image'));
+        formData.append('data', json);
+        try {
+          spinner.show();
+          $('#spnnier-backdrop').addClass('modal-backdrop');
+          const result = await fetch(`/admin/product/${prodId}`,{
+            method: "put",
+            body: formData
+          });
+          const data = await result.json();
+          if (data._id) {
+            // Display new data.
+            const productIndex = $(`#${ids.productID}`);
+            productIndex.text(titleProduct.val() ? titleProduct.val() : data.title);
+            const nimgUrl = $(`#${ids.imgUrl}img`);
+            nimgUrl.attr('src', `/${data.imgUrl}`);
+            const nprice = $(`#${ids.price}`);
+            nprice.text(price.val() ? price.val() : data.price);
+            const nbarcode = $(`#${ids.barcode}`);
+            nbarcode.text(barcode.val() ? barcode.val() : data.barcode);
+            const ndescription = $(`#${ids.description}`);
+            ndescription.text(description.val() ? description.val() : data.description);                  
+            // Hide modal
+            modalNew.removeAttr("display");
+            modalNew.attr("display","none");
+            spinner.hide();
+            $('#spnnier-backdrop').removeClass('modal-backdrop');
+            $(".modal-backdrop").remove();
+          }
+        } catch (err) {
+          console.log(err);
+          spinner.hide();
+          $('#spnnier-backdrop').removeClass('modal-backdrop');
+        }
+      })
+
+    } catch (err) {
+      console.log(err);
+      spinner.hide();
+      $('#spnnier-backdrop').removeClass('modal-backdrop');
+    }
+  });
+  
+}
+
 
 const detailProduct =  (product, ids) => {
   let detailBtn = $(`#${ids.detailID}`);
@@ -216,86 +302,6 @@ const detailProduct =  (product, ids) => {
   });
   
 }
-
-const editProduct = (product, ids) => {
-  let editBtn = $(`#${ids.editID}`);
-  editBtn.click( async () => {
-    titleForm.text('Cập nhật sản phẩm');
-    buttonName.text('Cập nhật');
-    spinner.show();
-    $('#spnnier-backdrop').addClass('modal-backdrop');
-    try{
-      const result = await fetch(`/admin/product/${product._id}`, { method: "get" });
-      const data = await result.json();
-      titleProduct.val(`${data.title}`);
-      imgUrl.html(`${data.imgUrl}`);
-      price.val(`${data.price}`);
-      barcode.val(`${data.barcode}`);
-      description.text(`${data.description}`);
-      $("#my-product-dialog-new").css("display","block");
-      spinner.hide();
-      $('#spnnier-backdrop').removeClass('modal-backdrop');
-    } catch (err) {
-      console.log(err);
-      spinner.hide();
-      $('#spnnier-backdrop').removeClass('modal-backdrop');
-    }
-  });
-      // after form shown and user input value and then click "Cap nhat" button
-      // handle submit "Cap nhat" button
-  form.unbind("submit").submit( async(e) => {
-    e.preventDefault();
-    // const formData = new FormData(formd);
-    // formData.append('test', 'test');
-    const json = JSON.stringify({
-      title: titleProduct.val(),
-      price: price.val(),
-      barcode: barcode.val(),
-      description: description.val(),
-      imgUrl: imgUrl.val()
-    });
-    console.log('data update value');
-    
-    console.log(json);
-    
-    fetch(`/admin/product/${product._id}`,{
-        method: "put",
-        headers : {
-          "Content-Type" : "application/json; charset=utf-8"
-        },
-        body: json
-    })
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      console.log(data);
-      if (data){
-          // Display new data.
-          const productIndex = $(`#${ids.productID}`);
-          productIndex.text(titleProduct.val() ? titleProduct.val() : data.title);
-          const nimgUrl = $(`#${ids.imgUrl}img`);
-            nimgUrl.attr('src', imgUrl.val() ? imgUrl.val() : data.imgUrl);
-          const nprice = $(`#${ids.price}`);
-          nprice.text(price.val() ? price.val() : data.price);
-          const nbarcode = $(`#${ids.barcode}`);
-          nbarcode.text(barcode.val() ? barcode.val() : data.barcode);
-          const ndescription = $(`#${ids.description}`);
-          ndescription.text(description.val() ? description.val() : data.description);                  
-          // Hide modal
-          modalNew.removeAttr("display");
-          modalNew.attr("display","none");
-          $(".modal-backdrop").remove();
-      
-      // get messsage here
-      }else{
-      // get message here
-      }
-      })
-      .catch(err => console.log(err));
-  })  
-}
-
 
 const deleteProduct = (product, ids) =>{
   let deleteBtn = $(`#${ids.deleteID}`);

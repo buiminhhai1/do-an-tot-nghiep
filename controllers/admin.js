@@ -60,7 +60,7 @@ exports.getDetailProduct = async (req, res, next) => {
 exports.getDetailProductByBarcode = async (req, res, next) => {
   const barcode = req.params.barcode;
   try {
-    const result = await Product.find({ barcode: barcode });
+    const result = await Product.findOne({ barcode: barcode });
     res.json(result);
   } catch (err) {
     console.log(err);
@@ -68,8 +68,6 @@ exports.getDetailProductByBarcode = async (req, res, next) => {
     next(err);
   }
 };
-
-
 
 exports.putProduct = async (req, res, next) => {
   const prodId = req.params.id;

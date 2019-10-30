@@ -14,8 +14,7 @@ router.get('/product/:id', adminController.getDetailProduct);
 router.get('/product/barcode/:barcode', adminController.getDetailProductByBarcode);
 
 // ---------- PUT here --------------------
-router.put('/product/:id', adminController.putProduct);
-
+// router.put('/product/:id', adminController.putProduct);
 
 // --------------- DELETE HERE -----------------------
 router.delete('/product/:id/barcode/:barcode', adminController.deleteProduct);
