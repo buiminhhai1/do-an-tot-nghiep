@@ -12,7 +12,9 @@ const barcode = $("#barcode");
 const description = $("#description");
 const closemodal = $("#closemodal");
 const modalNew = $("#my-product-dialog-new");
+const modalEdit = $("#my-product-dialog-edit");
 const spinner = $('#spinner');
+const editClose = $("#editclose");
 spinner.hide();
 
 
@@ -21,6 +23,11 @@ $('.closemodal').on('click',()=>{
   $('#my-product-dialog-new').modal('toggle');
   $(".modal-backdrop").remove();
 });
+
+$('.closemodaledit').on('click',()=>{
+  $('#my-supplier-dialog-edit').modal('toggle');
+  $(".modal-backdrop").remove();
+})
 
 // when you choose file, filename will append in the label.
 $(".custom-file-input").on("change", function() {
@@ -77,7 +84,7 @@ const buildTemplate = (product, ids) =>{
           <button type="button" class="btn btn-secondary"
             id="${ids.editID}"
             data-toggle="modal"
-            data-target="#my-product-dialog-new"
+            data-target="#my-product-dialog-edit"
           >Edit
           </button>
           <button type="button" class="btn btn-danger"
@@ -120,9 +127,15 @@ const displayProduct = (data, page, size) => {
 
 // handle reset product Input fields
 resetproductInput = () => { 
+  $('#titleProductEdit').val('');
+  $('#priceEdit').val(''),
+  $('#barcodeEdit').val(''),
+  $('#descriptionEdit').val('')
   titleProduct.val('');
+  $('.custom-file-label-edit')[0].innerText='Browser File';
   $('.custom-file-label')[0].innerText='Browser File';
   $('#image').val('')
+  $('#imageEdit').val('')
   price.val('');
   barcode.val('');
   description.val('');
@@ -164,12 +177,11 @@ form.submit(async (e) => {
     spinner.hide();
     $('#spnnier-backdrop').removeClass('modal-backdrop');
   }
-  
-   
 });
 
 $('#createNew').click(()=>{
   resetproductInput();
+  form.removeAttr('method');
   form.attr('method', 'POST');
   numbers.attr('readonly', false);
   numbers.attr('disabled', false);
@@ -182,7 +194,6 @@ $('#createNew').click(()=>{
   }, 500);
 });
 
-
 const editProduct = (product, ids) => {
   let editBtn = $(`#${ids.editID}`);
   const prodId = `${ids.editID}`;
@@ -190,48 +201,51 @@ const editProduct = (product, ids) => {
     console.log('product edit');
     console.log(product)
     console.log(`#${ids.editID}`);
-    form.attr('method', 'PUT');
-    titleForm.text('Cập nhật sản phẩm');
-    buttonName.text('Cập nhật');
+    // form.removeAttr('method');
+    // form.attr('method', 'PUT');
+    // titleForm.text('Cập nhật sản phẩm');
+    // buttonName.text('Cập nhật');
     spinner.show();
     $('#spnnier-backdrop').addClass('modal-backdrop');
     try{
       const result = await fetch(`/admin/product/${product._id}`, { method: "get" });
       const data = await result.json();
-      titleProduct.val(`${data.title}`);
-      oldNumbers = data.numbers;
-      price.val(`${data.price}`);
-      numbers.attr('readonly', true);
-      numbers.attr('disabled', true);
-      numbers.val(`${data.numbers}`);
-      barcode.val(`${data.barcode}`);
-      description.text(`${data.description}`);
-      $("#my-product-dialog-new").css("display","block");
+      $('#titleProductEdit').val(`${data.title}`);
+      $('#numbersEdit').val(`${data.numbers}`);
+      $('#priceEdit').val(`${data.price}`);
+      $('#numbersEdit').attr('readonly', true);
+      $('#numbersEdit').attr('disabled', true);
+      $('#numbersEdit').val(`${data.numbers}`);
+      $('#barcodeEdit').val(`${data.barcode}`);
+      $('#descriptionEdit').val(`${data.description}`);
+      $("#my-product-dialog-edit").css("display","block");
       spinner.hide();
       $('#spnnier-backdrop').removeClass('modal-backdrop');
-      form.unbind("submit").submit(async (e) => {
+
+      $('#form-edit').submit(async (e) => {
         e.preventDefault();
+        spinner.show();
+        $('#spnnier-backdrop').addClass('modal-backdrop');
+        editClose.trigger("click");
         console.log('log product after click');
         console.log(prodId);
         console.log('Nhảy vào edit product');
-        let formd = $('#form-add')[0];
+        let formd = $('#form-edit')[0];
         let formData = new FormData(formd);
         const json = JSON.stringify({
-          title: titleProduct.val(),
-          price: price.val(),
-          barcode: barcode.val(),
-          description: description.val()
+          title: $('#titleProductEdit').val(),
+          price: $('#priceEdit').val(),
+          barcode: $('#barcodeEdit').val(),
+          description: $('#descriptionEdit').val()
         });
-        formData.append('file', $('#image'));
+        formData.append('file', $('#imageEdit'));
         formData.append('data', json);
-        try {
-          spinner.show();
-          $('#spnnier-backdrop').addClass('modal-backdrop');
-          const result = await fetch(`/admin/product/${prodId}`,{
-            method: "put",
-            body: formData
-          });
-          const data = await result.json();
+        const result = await fetch(`/admin/products/product/${prodId}`,{
+          method: "put",
+          body: formData
+        });
+        
+        const data = await result.json();
           if (data._id) {
             // Display new data.
             const productIndex = $(`#${ids.productID}`);
@@ -245,19 +259,14 @@ const editProduct = (product, ids) => {
             const ndescription = $(`#${ids.description}`);
             ndescription.text(description.val() ? description.val() : data.description);                  
             // Hide modal
-            modalNew.removeAttr("display");
-            modalNew.attr("display","none");
+            modalEdit.removeAttr("display");
+            modalEdit.attr("display","none");
+            resetproductInput();
             spinner.hide();
             $('#spnnier-backdrop').removeClass('modal-backdrop');
             $(".modal-backdrop").remove();
           }
-        } catch (err) {
-          console.log(err);
-          spinner.hide();
-          $('#spnnier-backdrop').removeClass('modal-backdrop');
-        }
       })
-
     } catch (err) {
       console.log(err);
       spinner.hide();

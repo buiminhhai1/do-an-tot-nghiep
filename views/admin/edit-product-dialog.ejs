@@ -1,0 +1,61 @@
+<div class="modal fade" id="my-product-dialog-edit" tabindex="-1">
+	<div style="overflow: initial !important;" class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="title-form">Cập nhật sản phẩm</h2>
+			</div>
+			<form id="form-edit" method="PUT" enctype="multipart/form-data" >
+				<div class="modal-body" style="height: 500px; overflow-y: auto;">
+					<div class="form-row">
+						<div class="col-md-7 col-mb-1">
+							<label for="titleProductEdit">Tên sản phẩm</label>
+							<input type="text" class="form-control" id="titleProductEdit" value="" placeholder="Tên sản phẩm" required/>
+						</div>
+          </div>
+          <br>
+					<div class="form-row">
+            <div class="col-md-12">
+              <label for="imageEdit">Ảnh sản phẩm</label>
+              <div class="custom-file">
+                <input type="file" name="myImage" class="custom-file-input" id="imageEdit"/>
+                <label class="custom-file-label custom-file-label-edit" for="imageEdit">Choose file</label>
+              </div>
+            </div>
+          </div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="barcode">Barcode</label>
+							<input type="text" class="form-control" id="barcodeEdit" value="" placeholder="Barcode" />
+						</div>
+          </div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="priceEdit">Giá</label>
+							<input type="number" class="form-control" id="priceEdit" value="" placeholder="Giá" />
+						</div>
+          </div>
+          <br>
+          <div class="form-row">
+						<div class="col-md-12">
+							<label for="numbersEdit">Số lượng</label>
+							<input type="number" class="form-control" id="numbersEdit" value="" placeholder="Số lượng" />
+						</div>
+					</div>
+          <br>
+					<div class="form-row">
+						<div class="col-md-12">
+							<label for="descriptionEdit">Mô tả</label>
+								<textarea class="form-control" id="descriptionEdit"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-default btn-primary closemodaledit" type="submit">Cập nhật</button>
+					<button class='btn btn-default btn-dark closemodaledit' id="editclose" type ='button' data-dismiss="modal">Hủy bỏ</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
