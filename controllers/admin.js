@@ -215,7 +215,7 @@ exports.getProductWithBarcodeAndNumbers = async (req, res, next) => {
     let posList;
     let canTake;
   if (remainingAmount > numbers) {
-    posList = product.position.slice(0, remainingAmount - 1);
+    posList = product.position.slice(0, numbers - 1);
     product.position = product.position.slice(numbers, remainingAmount);
     product.numbers = remainingAmount - numbers;
     canTake = numbers;
