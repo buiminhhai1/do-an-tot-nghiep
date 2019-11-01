@@ -198,13 +198,8 @@ const editProduct = (product, ids) => {
   let editBtn = $(`#${ids.editID}`);
   const prodId = `${ids.editID}`;
   editBtn.click( async () => {
-    console.log('product edit');
     console.log(product)
     console.log(`#${ids.editID}`);
-    // form.removeAttr('method');
-    // form.attr('method', 'PUT');
-    // titleForm.text('Cập nhật sản phẩm');
-    // buttonName.text('Cập nhật');
     spinner.show();
     $('#spnnier-backdrop').addClass('modal-backdrop');
     try{
@@ -221,15 +216,10 @@ const editProduct = (product, ids) => {
       $("#my-product-dialog-edit").css("display","block");
       spinner.hide();
       $('#spnnier-backdrop').removeClass('modal-backdrop');
-
       $('#form-edit').submit(async (e) => {
         e.preventDefault();
         spinner.show();
         $('#spnnier-backdrop').addClass('modal-backdrop');
-        editClose.trigger("click");
-        console.log('log product after click');
-        console.log(prodId);
-        console.log('Nhảy vào edit product');
         let formd = $('#form-edit')[0];
         let formData = new FormData(formd);
         const json = JSON.stringify({
@@ -244,7 +234,7 @@ const editProduct = (product, ids) => {
           method: "put",
           body: formData
         });
-        
+        editClose.trigger("click");
         const data = await result.json();
           if (data._id) {
             // Display new data.

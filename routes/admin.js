@@ -13,8 +13,11 @@ router.get('/product/:id', adminController.getDetailProduct);
 
 router.get('/product/barcode/:barcode', adminController.getDetailProductByBarcode);
 
+router.get('/product/barcode/:barcode/numbers/:numbers', adminController.getProductWithBarcodeAndNumbers);
 // ---------- PUT here --------------------
-// router.put('/product/:id', adminController.putProduct);
+router.post('/product', adminController.createProduct)
+
+router.put('/products/product/:id', adminController.updateProduct);
 
 // --------------- DELETE HERE -----------------------
 router.delete('/product/:id/barcode/:barcode', adminController.deleteProduct);
